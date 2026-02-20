@@ -14,12 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+use App\Http\Controllers\AuthController;
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/saludo', function () {
-    return response()->json(['mensaje' => '¡Hola desde el Backend!']);
-});
-
-Route::post('/register', [AuthController::class, register]);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
