@@ -2,13 +2,19 @@
 
 namespace App\Models;
 
+<<<<<<< HEAD
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Jenssegers\Mongodb\Auth\User as Authenticatable;
+=======
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
+>>>>>>> Cris
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
+<<<<<<< HEAD
     use HasFactory, Notifiable;
 
     protected $connection = 'mongodb';
@@ -20,28 +26,25 @@ class User extends Authenticatable implements JWTSubject
     {
         return new \MongoDB\BSON\UTCDateTime((int) round(microtime(true) * 1000));
     }
+=======
+    use HasApiTokens, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    // Esto le dice a Laravel que no use SQL, sino la conexión Mongo que definiste
+    protected $connection = 'mongodb';
+    protected $collection = 'users'; 
+>>>>>>> Cris
+
     protected $fillable = [
-        'name',
-        'email',
+        'username',
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+<<<<<<< HEAD
     /**
      * The attributes that should be cast.
      *
@@ -66,8 +69,19 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return array
      */
+=======
+    public function getJWTIdentifier()
+    {
+        return (string) $this->_id;    
+    }
+
+>>>>>>> Cris
     public function getJWTCustomClaims()
     {
         return [];
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> Cris

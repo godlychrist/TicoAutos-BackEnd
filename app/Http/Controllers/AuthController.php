@@ -4,67 +4,91 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB; // Usaremos DB directamente
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Routing\Controller as BaseController;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
-    public function register(Request $request)
+    public function register(Request $request) 
     {
+        // 1. Validamos los datos
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:mongodb.users',
-            'password' => 'required|string|min:6|confirmed',
+            'username' => 'required|string|max:255',
+            'password' => 'required|string|min:6'
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        try {
+            $userId = DB::connection('mongodb')
+                ->collection('users')
+                ->insertGetId([
+                    'username' => $request->username,
+                    'password' => Hash::make($request->password),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
-        $token = JWTAuth::fromUser($user);
+            return response()->json([
+                'message' => '¡Usuario registrado con éxito en MongoDB!',
+                'user_id' => $userId
+            ], 201);
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-        ], 201);
+        } catch (\Exception $e) {
+            // 3. Si algo sale mal con la conexión a Atlas, aquí lo veremos
+            return response()->json([
+                'message' => 'Error de conexión con MongoDB Atlas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-
+        
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->only('username', 'password');
 
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        try {
+            // 1. Buscamos al usuario usando DB::connection('mongodb')
+            // Esto NO dispara el error de prepare() porque no usa PDO
+            $userDoc = DB::connection('mongodb')
+                ->collection('users')
+                ->where('username', $credentials['username'])
+                ->first();
+
+            // 2. Verificamos si existe y la clave
+            if (!$userDoc || !Hash::check($credentials['password'], $userDoc['password'])) {
+                return response()->json(['error' => 'Credenciales inválidas'], 401);
+            }
+
+            // 3. Convertimos el array de MongoDB en un objeto para que JWT lo entienda
+            $user = new \App\Models\User();
+            foreach ($userDoc as $key => $value) {
+                $user->{$key} = $value;
+            }
+
+            // 4. Generamos el token
+            $token = JWTAuth::fromUser($user);
+
+            return response()->json([
+                'message' => 'Login exitoso',
+                'token' => $token,
+                'user' => [
+                    'username' => $user->username,
+                    'id' => (string) $user->_id
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error crítico en el login',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return $this->respondWithToken($token);
     }
-
-    public function me()
-    {
-        return response()->json(auth()->user());
-    }
-
-    public function logout()
-    {
-        auth()->logout();
-
-        return response()->json(['message' => 'Successfully logged out']);
-    }
-
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 60
-        ]);
-    }
+    
 }

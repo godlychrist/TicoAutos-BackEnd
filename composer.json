@@ -13,8 +13,13 @@
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
+<<<<<<< HEAD
         "mongodb/laravel-mongodb": "v3.9.5",
         "tymon/jwt-auth": "dev-develop"
+=======
+        "mongodb/laravel-mongodb": "^3.9",
+        "tymon/jwt-auth": "^2.2"
+>>>>>>> Cris
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
