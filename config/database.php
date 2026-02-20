@@ -43,15 +43,9 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
         'mongodb' => [
-            'driver' => 'mongodb',
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', 27017),
+            'driver'   => 'mongodb',
+            'dsn' => env('DB_URI'),
             'database' => env('DB_DATABASE', 'TicoCars'),
-            'username' => env('DB_USERNAME', ''),
-            'password' => env('DB_PASSWORD', ''),
-            'options' => [
-                'database' => env('DB_AUTHENTICATION_DATABASE', 'admin'),
-            ]
         ],
 
         'mysql' => [
@@ -136,7 +130,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
         ],
 
         'default' => [
