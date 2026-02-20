@@ -22,4 +22,4 @@ Route::get('/saludo', function () {
     return response()->json(['mensaje' => '¡Hola desde el Backend!']);
 });
 
-Route::post('/register', [AuthController::class, register])
+Route::post('/register', [AuthController::class, register]);
