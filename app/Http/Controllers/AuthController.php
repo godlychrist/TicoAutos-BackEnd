@@ -12,7 +12,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends BaseController
 {
-    public function register(Request $request) 
+    public function register(Request $request)
     {
         // 1. Validamos los datos
         $validator = Validator::make($request->all(), [
@@ -47,32 +47,33 @@ class AuthController extends BaseController
             ], 500);
         }
     }
-        
+
     public function login(Request $request)
     {
         $credentials = $request->only('username', 'password');
 
         try {
-            // 1. Buscamos al usuario usando DB::connection('mongodb')
-            // Esto NO dispara el error de prepare() porque no usa PDO
-            $userDoc = DB::connection('mongodb')
-                ->collection('users')
-                ->where('username', $credentials['username'])
-                ->first();
+            \Log::info('Intento de login para usuario: ' . $credentials['username']);
 
-            // 2. Verificamos si existe y la clave
-            if (!$userDoc || !Hash::check($credentials['password'], $userDoc['password'])) {
+            // 1. Buscamos al usuario
+            $user = User::where('username', $credentials['username'])->first();
+            if ($user) {
+                \Log::info('Usuario encontrado. Tipo de password: ' . gettype($user->password));
+            } else {
+                \Log::info('Usuario no encontrado.');
+            }
+
+            // 2. Verificamos clave
+            if (!$user || !Hash::check($credentials['password'], $user->password)) {
+                \Log::warning('Credenciales inválidas para: ' . $credentials['username']);
                 return response()->json(['error' => 'Credenciales inválidas'], 401);
             }
 
-            // 3. Convertimos el array de MongoDB en un objeto para que JWT lo entienda
-            $user = new \App\Models\User();
-            foreach ($userDoc as $key => $value) {
-                $user->{$key} = $value;
-            }
+            \Log::info('Clave verificada. Generando token...');
 
-            // 4. Generamos el token
+            // 3. Generamos el token
             $token = JWTAuth::fromUser($user);
+            \Log::info('Token generado con éxito');
 
             return response()->json([
                 'message' => 'Login exitoso',
@@ -90,5 +91,5 @@ class AuthController extends BaseController
             ], 500);
         }
     }
-    
+
 }

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Jenssegers\Mongodb\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -11,14 +11,15 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, Notifiable;
 
-    // Esto le dice a Laravel que no use SQL, sino la conexión Mongo que definiste
     protected $connection = 'mongodb';
-    protected $collection = 'users'; 
+    protected $collection = 'users';
 
     protected $fillable = [
         'username',
         'password',
     ];
+
+    public $timestamps = false;
 
     protected $hidden = [
         'password',
@@ -27,7 +28,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function getJWTIdentifier()
     {
-        return (string) $this->_id;    
+        return (string) $this->_id;
     }
 
     public function getJWTCustomClaims()
