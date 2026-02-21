@@ -2,8 +2,13 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+<<<<<<< HEAD
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VehicleController;
+=======
+use App\Http\Controllers\VehiclesController;
+use App\Http\Controllers\AuthController;
+>>>>>>> origin/Cris
 
 /*
 |--------------------------------------------------------------------------
@@ -11,6 +16,7 @@ use App\Http\Controllers\VehicleController;
 |--------------------------------------------------------------------------
 */
 
+<<<<<<< HEAD
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -22,3 +28,14 @@ Route::delete('/vehicles/{id}', [VehicleController::class, 'destroy']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+=======
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/vehicles', [VehiclesController::class, 'store']);
+Route::get('/vehicles', [VehiclesController::class, 'index']);
+>>>>>>> origin/Cris
