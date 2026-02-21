@@ -12,7 +12,9 @@ use Illuminate\Routing\Controller as BaseController;
 class VehiclesController extends BaseController {
 
     public function index() {
-        $vehicles = Vehicle::all();
+        $vehicles = DB::connection('mongodb')
+        ->collection('vehicles')
+        ->get();
         return response()->json($vehicles);
     }
 
@@ -43,8 +45,7 @@ class VehiclesController extends BaseController {
             'status' => $request->status,
             'image' => $path,
             'user_id' => $request->user_id,
-            'created_at' => now(),
-            'updated_at' => now(),
+
         ]);
 
         return response()->json(['message' => 'Vehiculo agregado', 'vehicle' => $vehicle], 201);
