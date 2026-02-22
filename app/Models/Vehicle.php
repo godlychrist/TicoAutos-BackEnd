@@ -15,7 +15,7 @@ class Vehicle extends Model
         'year',
         'price',
         'status',
-        'image_url',
+        'image',
         'user_id'
     ];
 
