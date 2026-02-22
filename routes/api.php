@@ -20,7 +20,4 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Vehículos (Nomenclature plural de Cris + Funciones nuevas)
-Route::get('/vehicles', [VehiclesController::class, 'index']);
-Route::post('/vehicles', [VehiclesController::class, 'store']);
-Route::put('/vehicles/{id}', [VehiclesController::class, 'update']);
-Route::delete('/vehicles/{id}', [VehiclesController::class, 'destroy']);
+Route::post('/vehicles', [VehiclesController::class, 'createVehicle']);
