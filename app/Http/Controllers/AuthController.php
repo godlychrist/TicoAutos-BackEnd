@@ -25,14 +25,10 @@ class AuthController extends BaseController
         }
 
         try {
-            $userId = DB::connection('mongodb')
-                ->collection('users')
-                ->insertGetId([
-                    'username' => $request->username,
-                    'password' => Hash::make($request->password),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            $userId = User::create([
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+            ]);
 
             return response()->json([
                 'message' => '¡Usuario registrado con éxito en MongoDB!',
