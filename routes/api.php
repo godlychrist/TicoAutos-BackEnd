@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\VehiclesController;
+use App\Http\Controllers\VehicleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,4 +20,5 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Vehículos (Nomenclature plural de Cris + Funciones nuevas)
-Route::post('/vehicles', [VehiclesController::class, 'createVehicle']);
+Route::post('/vehicles', [VehicleController::class, 'createVehicle']);
+Route::get('/vehicles', [VehicleController::class, 'index']);
