@@ -53,4 +53,54 @@ class VehicleController extends Controller
             'vehicle' => $vehicle
         ], 201);
     }
+
+    public function editVehicle(Request $request, $id) {
+        $validator = Validator::make($request->all(), [
+            'brand' => 'required|string',
+            'model' => 'required|string',
+            'year' => 'required|numeric',
+            'price' => 'required|numeric',
+            'status' => 'required|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp',
+            'user_id' => 'required'   
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error al editar el vehículo',
+                'error' => $validator->errors()
+            ], 422);
+        }
+
+        $vehicle = Vehicle::findOrFail($id);
+
+        $vehicle->update($request->only([
+            'brand',
+            'model',
+            'year',
+            'price',
+            'status',
+            'image',
+            'user_id'
+        ]));
+
+        if($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('vehicles', 'public');
+            $vehicle->update([
+                'image' => $imagePath
+            ]);
+        }
+        return response()->json([
+            'message' => 'Vehículo editado exitosamente',
+            'vehicle' => $vehicle
+        ], 200);
+    }
+
+    public function deleteVehicle(Request $request, $id) {
+        $vehicle = Vehicle::findOrFail($id);
+        $vehicle->delete();
+        return response()->json([
+            'message' => 'Vehículo eliminado exitosamente',
+            'vehicle' => $vehicle
+        ], 200);
+    }
 }
