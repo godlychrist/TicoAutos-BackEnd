@@ -22,3 +22,5 @@ Route::post('/login', [AuthController::class, 'login']);
 // Vehículos (Nomenclature plural de Cris + Funciones nuevas)
 Route::post('/vehicles', [VehicleController::class, 'createVehicle']);
 Route::get('/vehicles', [VehicleController::class, 'index']);
+Route::put('/vehicles/{id}', [VehicleController::class, 'editVehicle']);
+Route::delete('/vehicles/{id}', [VehicleController::class, 'deleteVehicle']);
