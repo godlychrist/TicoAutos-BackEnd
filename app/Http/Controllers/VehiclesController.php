@@ -24,7 +24,6 @@ class VehiclesController extends Controller
             'price' => 'required|numeric',
             'status' => 'required|string',
             'image' => 'required|image|mimes:jpeg,png,jpg,webp',
-            'user_id' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -46,7 +45,7 @@ class VehiclesController extends Controller
             'price' => $request->price,
             'status' => $request->status,
             'image' => $imagePath,
-            'user_id' => $request->user_id
+            'user_id' => auth()->id() // Usamos el ID del token
         ]);
 
         return response()->json([
@@ -64,7 +63,6 @@ class VehiclesController extends Controller
             'price' => 'numeric',
             'status' => 'string',
             'image' => 'image|mimes:jpeg,png,jpg,webp',
-            'user_id' => 'string'
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -73,7 +71,8 @@ class VehiclesController extends Controller
             ], 422);
         }
 
-        $vehicle = Vehicle::findOrFail($id);
+        // Solo permitir editar si el vehículo le pertenece al usuario
+        $vehicle = Vehicle::where('_id', $id)->where('user_id', auth()->id())->firstOrFail();
 
         $vehicle->update($request->only([
             'brand',
@@ -81,11 +80,13 @@ class VehiclesController extends Controller
             'year',
             'price',
             'status',
-            'image',
-            'user_id'
         ]));
 
         if ($request->hasFile('image')) {
+            // Borrar imagen anterior si existe
+            if ($vehicle->image) {
+                Storage::disk('public')->delete($vehicle->image);
+            }
             $imagePath = $request->file('image')->store('vehicles', 'public');
             $vehicle->update([
                 'image' => $imagePath
@@ -99,7 +100,14 @@ class VehiclesController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        $vehicle = Vehicle::findOrFail($id);
+        // Solo permitir borrar si el vehículo le pertenece al usuario
+        $vehicle = Vehicle::where('_id', $id)->where('user_id', auth()->id())->firstOrFail();
+
+        // Limpiar imagen del storage
+        if ($vehicle->image) {
+            Storage::disk('public')->delete($vehicle->image);
+        }
+
         $vehicle->delete();
         return response()->json([
             'message' => 'Vehículo eliminado exitosamente',
