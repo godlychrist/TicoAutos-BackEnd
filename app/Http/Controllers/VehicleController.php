@@ -56,13 +56,13 @@ class VehicleController extends Controller
 
     public function editVehicle(Request $request, $id) {
         $validator = Validator::make($request->all(), [
-            'brand' => 'required|string',
-            'model' => 'required|string',
-            'year' => 'required|numeric',
-            'price' => 'required|numeric',
-            'status' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp',
-            'user_id' => 'required'   
+            'brand' => 'string',
+            'model' => 'string',
+            'year' => 'numeric',
+            'price' => 'numeric',
+            'status' => 'string',
+            'image' => 'image|mimes:jpeg,png,jpg,webp',
+            'user_id' => 'string'
         ]);
         if ($validator->fails()) {
             return response()->json([
