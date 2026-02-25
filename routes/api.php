@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VehiclesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,18 +11,19 @@ use App\Http\Controllers\VehicleController;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 // Autenticación (Basado en la estructura de Cris)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/vehicles', [VehicleController::class, 'index']);
 
-// Vehículos (Nomenclature plural de Cris + Funciones nuevas)
+// Vehículos (Estilo Cris: Plural + Métodos estándar)
+Route::get('/vehicles', [VehiclesController::class, 'index']);
+
 Route::middleware('auth:api')->group(function () {
-    Route::post('/vehicles', [VehicleController::class, 'createVehicle']);
-    Route::put('/vehicles/{id}', [VehicleController::class, 'editVehicle']);
-    Route::delete('/vehicles/{id}', [VehicleController::class, 'deleteVehicle']);
+    Route::post('/vehicles', [VehiclesController::class, 'store']);
+    Route::put('/vehicles/{id}', [VehiclesController::class, 'update']);
+    Route::delete('/vehicles/{id}', [VehiclesController::class, 'destroy']);
 });
