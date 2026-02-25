@@ -19,7 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Vehículos (Estilo Cris: Plural + Métodos estándar)
+// Vehículos (ESTO ES EXACTAMENTE COMO LO TIENE CRIS)
 Route::get('/vehicles', [VehiclesController::class, 'index']);
 
 Route::middleware('auth:api')->group(function () {
