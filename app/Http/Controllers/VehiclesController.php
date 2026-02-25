@@ -20,7 +20,7 @@ class VehiclesController extends Controller
         $validator = Validator::make($request->all(), [
             'brand' => 'required|string',
             'model' => 'required|string',
-            'year' => 'required|numeric',
+            'year' => 'required|numeric|min:1900|max:' . (date('Y') + 1),
             'price' => 'required|numeric',
             'status' => 'required|string',
             'image' => 'required|image|mimes:jpeg,png,jpg,webp',
@@ -59,7 +59,7 @@ class VehiclesController extends Controller
         $validator = Validator::make($request->all(), [
             'brand' => 'string',
             'model' => 'string',
-            'year' => 'numeric',
+            'year' => 'numeric|min:1900|max:' . (date('Y') + 1),
             'price' => 'numeric',
             'status' => 'string',
             'image' => 'image|mimes:jpeg,png,jpg,webp',
