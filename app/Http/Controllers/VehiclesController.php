@@ -9,10 +9,49 @@ use Illuminate\Support\Facades\Validator;
 
 class VehiclesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $vehicle = Vehicle::all();
-        return response()->json($vehicle);
+        $query = Vehicle::query();
+
+        // Filtro por búsqueda de texto (Marca o Modelo)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('model', 'like', '%' . $search . '%')
+                    ->orWhere('brand', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filtro por Marca exacta
+        if ($request->filled('brand')) {
+            $query->where('brand', $request->brand);
+        }
+
+        // Filtro por Estado
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filtro por Año Mínimo
+        if ($request->filled('year_min')) {
+            $query->where('year', '>=', (int) $request->year_min);
+        }
+
+        // Filtro por Año Máximo
+        if ($request->filled('year_max')) {
+            $query->where('year', '<=', (int) $request->year_max);
+        }
+
+        // Filtro por Rango de Precio
+        if ($request->filled('price_range')) {
+            $range = explode('-', $request->price_range);
+            if (count($range) === 2) {
+                $query->where('price', '>=', (int) $range[0])
+                    ->where('price', '<=', (int) $range[1]);
+            }
+        }
+
+        return response()->json($query->orderBy('created_at', 'desc')->get());
     }
 
     public function show($id)
