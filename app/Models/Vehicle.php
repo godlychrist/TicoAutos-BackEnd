@@ -19,6 +19,12 @@ class Vehicle extends Model
         'user_id'
     ];
 
+    protected $casts = [
+        'price' => 'float',
+        'year' => 'integer',
+        'user_id' => 'string'
+    ];
+
     public $timestamps = false;
 
     public function user()
