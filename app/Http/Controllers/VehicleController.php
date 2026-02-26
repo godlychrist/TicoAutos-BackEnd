@@ -9,10 +9,40 @@ use Illuminate\Support\Facades\Validator;
 
 class VehicleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $vehicle = Vehicle::all();
-        return response()->json($vehicle);
+        $query = Vehicle::query();
+
+        if ($request->filled('brand')) {
+            $query->where('brand', $request->brand);
+        }
+
+        if ($request->filled('search')) {
+            $query->where('model', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('year_min')) {
+            $query->where('year', '>=', $request->year_min);
+        }
+
+        if ($request->filled('year_max')) {
+            $query->where('year', '<=', $request->year_max);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('price_range')) {
+            $range = explode('-', $request->price_range);
+            $min = (int) $range[0];
+            $max = (int) $range[1];
+            $query->whereBetween('price', [$min, $max]);
+        }
+
+        $vehicles = $query->get();
+
+        return response()->json($vehicles);
     }
 
     public function createVehicle(Request $request) {
@@ -41,8 +71,8 @@ class VehicleController extends Controller
         $vehicle = Vehicle::create([
             'brand' => $request->brand,
             'model' => $request->model,
-            'year' => $request->year,
-            'price' => $request->price,
+            'year' => (int) $request->year,
+            'price' => (float) $request->price,
             'status' => $request->status,
             'image' => $imagePath,
             'user_id' => $request->user_id
