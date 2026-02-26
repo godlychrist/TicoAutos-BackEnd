@@ -51,7 +51,7 @@ class VehiclesController extends Controller
             }
         }
 
-        return response()->json($query->orderBy('created_at', 'desc')->get());
+        return response()->json($query->orderBy('created_at', 'desc')->paginate(8));
     }
 
     public function show($id)
