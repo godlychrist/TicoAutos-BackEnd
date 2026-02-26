@@ -21,6 +21,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Vehículos (ESTO ES EXACTAMENTE COMO LO TIENE CRIS)
 Route::get('/vehicles', [VehiclesController::class, 'index']);
+Route::get('/vehicles/{id}', [VehiclesController::class, 'show']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/vehicles', [VehiclesController::class, 'store']);
