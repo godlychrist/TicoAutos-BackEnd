@@ -44,7 +44,7 @@ return [
         ],
         'mongodb' => [
             'driver' => 'mongodb',
-            'dsn' => env('MONGODB_URI'),
+            'dsn' => env('DB_URI'),
             'database' => env('DB_DATABASE', 'TicoCars'),
         ],
 
