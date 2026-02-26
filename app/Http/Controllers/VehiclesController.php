@@ -15,6 +15,12 @@ class VehiclesController extends Controller
         return response()->json($vehicle);
     }
 
+    public function show($id)
+    {
+        $vehicle = Vehicle::with('user')->findOrFail($id);
+        return response()->json($vehicle);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
