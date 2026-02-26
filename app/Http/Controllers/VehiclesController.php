@@ -11,6 +11,22 @@ class VehiclesController extends Controller
 {
     public function index(Request $request)
     {
+        // AUTO-FIX: Convertimos datos viejos (strings) a números reales en MongoDB
+        // Esto solo corre una vez internamente si detecta strings.
+        Vehicle::all()->each(function ($v) {
+            $changed = false;
+            if (isset($v->price) && is_string($v->price)) {
+                $v->price = (float) $v->price;
+                $changed = true;
+            }
+            if (isset($v->year) && is_string($v->year)) {
+                $v->year = (int) $v->year;
+                $changed = true;
+            }
+            if ($changed)
+                $v->save();
+        });
+
         $query = Vehicle::query();
 
         // Filtro por búsqueda de texto (Marca o Modelo)
@@ -46,8 +62,8 @@ class VehiclesController extends Controller
         if ($request->filled('price_range')) {
             $range = explode('-', $request->price_range);
             if (count($range) === 2) {
-                $query->where('price', '>=', (int) $range[0])
-                    ->where('price', '<=', (int) $range[1]);
+                $query->where('price', '>=', (float) $range[0])
+                    ->where('price', '<=', (float) $range[1]);
             }
         }
 
@@ -86,8 +102,8 @@ class VehiclesController extends Controller
         $vehicle = Vehicle::create([
             'brand' => $request->brand,
             'model' => $request->model,
-            'year' => $request->year,
-            'price' => $request->price,
+            'year' => (int) $request->year,
+            'price' => (float) $request->price,
             'status' => $request->status,
             'image' => $imagePath,
             'user_id' => auth()->id() // Usamos el ID del token
@@ -119,13 +135,20 @@ class VehiclesController extends Controller
         // Solo permitir editar si el vehículo le pertenece al usuario
         $vehicle = Vehicle::where('_id', $id)->where('user_id', auth()->id())->firstOrFail();
 
-        $vehicle->update($request->only([
+        $data = $request->only([
             'brand',
             'model',
             'year',
             'price',
             'status',
-        ]));
+        ]);
+
+        if (isset($data['year']))
+            $data['year'] = (int) $data['year'];
+        if (isset($data['price']))
+            $data['price'] = (float) $data['price'];
+
+        $vehicle->update($data);
 
         if ($request->hasFile('image')) {
             // Borrar imagen anterior si existe
