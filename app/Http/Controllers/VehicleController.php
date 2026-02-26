@@ -40,7 +40,7 @@ class VehicleController extends Controller
             $query->whereBetween('price', [$min, $max]);
         }
 
-        $vehicles = $query->get();
+        $vehicles = $query->paginate(8);
 
         return response()->json($vehicles);
     }
