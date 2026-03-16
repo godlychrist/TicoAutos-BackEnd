@@ -18,6 +18,7 @@ class Message extends Model
         'conversation_id',
         'sender_id',
         'message',
+        'created_at',
     ];
 
     public function conversation()
