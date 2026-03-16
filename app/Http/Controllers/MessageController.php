@@ -15,36 +15,60 @@ class MessageController extends Controller
         return response()->json($messages);
     }
 
-    public function store(Request $request) {
+public function store(Request $request)
+{
+    try {
         $user = $request->user();
-        
-        //Revisa el turno
-        $lastMessage = Message::where('conversation_id', $request->conversation_id)
-        ->orderBy('created_at', 'desc')
-        ->first();
-        if($lastMessage && $lastMessage->sender_id == $user->id) {
-            return response()->json(['message' => 'Espera a que la otra persona responda!'], 403);
+        $userId = (string) ($user->_id ?? $user->id);
+
+        $lastMessage = Message::where('conversation_id', (string) $request->conversation_id)
+            ->orderBy('_id', 'desc')
+            ->first();
+
+        if ($lastMessage && (string) $lastMessage->sender_id === $userId) {
+            return response()->json([
+                'message' => 'Espera a que la otra persona responda!'
+            ], 403);
         }
 
-        // Crea el mensaje
         $message = Message::create([
-            'conversation_id' => $request->conversation_id,
-            'sender_id' => $user->id,
+            'conversation_id' => (string) $request->conversation_id,
+            'sender_id' => $userId,
             'message' => $request->message,
         ]);
 
-        // Actualiza
+
         $conversation = Conversation::find($request->conversation_id);
+
+
+        if (!$conversation) {
+            return response()->json([
+                'message' => 'Conversación no encontrada'
+            ], 404);
+        }
+
         $conversation->update([
             'last_message' => $request->message,
             'last_message_at' => now()
         ]);
 
 
-        return response()->json($message);
+        return response()->json($message, 201);
 
+    } catch (\Throwable $e) {
+        \Log::error('STORE MESSAGE ERROR', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]);
 
+        return response()->json([
+            'message' => 'Error interno del servidor',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
     public function getConversations(Request $request) {
         $user = $request->user();
@@ -55,7 +79,7 @@ class MessageController extends Controller
     // 
     public function createConversation(Request $request) {
         $user = $request->user();
-        if($user->id == $request->seller_id) {
+        if((string)$user->id === (string)$request->seller_id) {
             return response()->json(['message' => 'No puedes crear una conversación contigo mismo']);
         }
 
@@ -80,7 +104,7 @@ class MessageController extends Controller
         }
 
         $user = $request->user();
-        if($user->id != $conversation->seller_id && $user->id != $conversation->buyer_id) {
+        if((string)$user->id !== (string)$conversation->seller_id && (string)$user->id !== (string)$conversation->buyer_id) {
             return response()->json(['message' => 'No tienes permiso para esta conversacion!'], 403);
         }
         $messages = Message::where('conversation_id', $id)->get();
