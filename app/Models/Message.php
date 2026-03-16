@@ -10,6 +10,7 @@ class Message extends Model
 
     protected $connection = 'mongodb';
     protected $collection = 'messages';
+    public $timestamps = false;
     
     use HasFactory;
 
