@@ -9,6 +9,8 @@ class Conversation extends Model
 {
     protected $connection = 'mongodb';
     protected $collection = 'conversations';
+    public $timestamps = false;
+
 
     use HasFactory;
 
