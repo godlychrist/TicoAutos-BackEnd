@@ -43,8 +43,8 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
         'mongodb' => [
-            'driver'   => 'mongodb',
-            'dsn'      => env('MONGODB_URI'),
+            'driver' => 'mongodb',
+            'dsn' => env('DB_URI'),
             'database' => env('DB_DATABASE', 'TicoCars'),
         ],
 

@@ -23,11 +23,11 @@ class VehicleController extends Controller
         }
 
         if ($request->filled('year_min')) {
-            $query->where('year', '>=', $request->year_min);
+            $query->where('year', '>=', (int) $request->year_min);
         }
 
         if ($request->filled('year_max')) {
-            $query->where('year', '<=', $request->year_max);
+            $query->where('year', '<=', (int) $request->year_max);
         }
 
         if ($request->filled('status')) {

@@ -19,6 +19,7 @@ class Message extends Model
         'conversation_id',
         'sender_id',
         'message',
+        'created_at',
     ];
 
     // Relación: Cada mensaje pertenece a un hilo de conversación
