@@ -44,8 +44,12 @@ return [
         ],
         'mongodb' => [
             'driver' => 'mongodb',
-            'dsn' => env('DB_URI'),
+            'dsn' => env('MONGODB_URI'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '27017'),
             'database' => env('DB_DATABASE', 'TicoCars'),
+            'username' => env('DB_USERNAME', ''),
+            'password' => env('DB_PASSWORD', ''),
         ],
 
         'mysql' => [

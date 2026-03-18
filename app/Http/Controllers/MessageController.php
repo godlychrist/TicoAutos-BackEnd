@@ -43,7 +43,7 @@ class MessageController extends Controller
                 ->orderBy('_id', 'desc')
                 ->first();
 
-            if ($lastMessage && (string) $lastMessage->sender_id === $userId) {
+            if ($lastMessage && (string) $lastMessage->sender_id === (string) $userId) {
                 return response()->json([
                     'message' => 'Espera a que la otra persona responda!'
                 ], 403);
@@ -65,18 +65,19 @@ class MessageController extends Controller
             }
 
             // Registrar timestamp del último mensaje por rol (buyer/seller)
-            if((string)$userId == (string)$conversation->buyer_id ) {
-               $updateData['buyer_msg'] = now();
+            if ((string) $userId === (string) $conversation->buyer_id) {
+                $updateData['buyer_msg'] = now()->format('Y-m-d H:i:s');
             }
 
-            if((string)$userId == (string)$conversation->seller_id ) {
-               $updateData['seller_msg'] = now();
+            if ((string) $userId === (string) $conversation->seller_id) {
+                $updateData['seller_msg'] = now()->format('Y-m-d H:i:s');
             }
             $updateData['last_message'] = $request->message;
-            $updateData['last_message_at'] = now();
+            $updateData['last_message_at'] = now()->format('Y-m-d H:i:s');
 
             $conversation->update($updateData);
 
+            $message->_id = (string) $message->_id;
             return response()->json($message, 201);
 
         } catch (\Throwable $e) {
@@ -98,14 +99,21 @@ class MessageController extends Controller
      * Obtener todas las conversaciones del usuario autenticado.
      * Incluye datos del comprador, vendedor y vehículo (eager loading).
      */
-    public function getConversations(Request $request) {
+    public function getConversations(Request $request)
+    {
         $user = $request->user();
         $userId = (string) ($user->_id ?? $user->id);
         $conversations = Conversation::with(['buyer', 'seller', 'vehicle'])
             ->where('buyer_id', $userId)
             ->orWhere('seller_id', $userId)
             ->get();
-        return response()->json($conversations);
+        return response()->json($conversations->map(function ($conv) {
+            $conv->_id = (string) $conv->_id;
+            $conv->buyer_id = (string) $conv->buyer_id;
+            $conv->seller_id = (string) $conv->seller_id;
+            $conv->vehicle_id = (string) $conv->vehicle_id;
+            return $conv;
+        }));
     }
 
     /**
@@ -115,21 +123,31 @@ class MessageController extends Controller
      * y reutiliza una conversación existente si ya existe para el mismo
      * par de usuarios y vehículo (evita duplicados).
      */
-    public function createConversation(Request $request) {
+    public function createConversation(Request $request)
+    {
         $user = $request->user();
-        if((string)$user->id === (string)$request->seller_id) {
-            return response()->json(['message' => 'No puedes crear una conversación contigo mismo']);
+        $userId = (string) ($user->_id ?? $user->id);
+        if ($userId === (string) $request->seller_id) {
+            return response()->json(['message' => 'No puedes crear una conversación contigo mismo'], 403);
         }
 
-        $existing = Conversation::where('buyer_id', $user->id)->where('seller_id', $request->seller_id)->where('vehicle_id', $request->vehicle_id)->first();
-        if($existing) {
+        $existing = Conversation::where('buyer_id', $userId)
+            ->where('seller_id', (string) $request->seller_id)
+            ->where('vehicle_id', (string) $request->vehicle_id)
+            ->first();
+
+        if ($existing) {
+            $existing->_id = (string) $existing->_id;
             return response()->json($existing);
         }
+
         $conversation = Conversation::create([
-            'buyer_id' => $user->id,
-            'seller_id' => $request->seller_id,
-            'vehicle_id' => $request->vehicle_id,
+            'buyer_id' => $userId,
+            'seller_id' => (string) $request->seller_id,
+            'vehicle_id' => (string) $request->vehicle_id,
         ]);
+
+        $conversation->_id = (string) $conversation->_id;
         return response()->json($conversation);
     }
 
@@ -140,34 +158,38 @@ class MessageController extends Controller
      * Formatea los timestamps a hora de Costa Rica (America/Costa_Rica)
      * en formato legible (hh:mm AM/PM).
      */
-    public function getConversation(Request $request, $id) {
+    public function getConversation(Request $request, $id)
+    {
         $conversation = Conversation::find($id);
-        if(!$conversation) {
+        if (!$conversation) {
             return response()->json(['message' => 'No existe conversacion.'], 404);
         }
 
         $user = $request->user();
-        if((string)$user->id !== (string)$conversation->seller_id && (string)$user->id !== (string)$conversation->buyer_id) {
+        $userId = (string) ($user->_id ?? $user->id);
+
+        if ($userId !== (string) $conversation->seller_id && $userId !== (string) $conversation->buyer_id) {
             return response()->json(['message' => 'No tienes permiso para esta conversacion!'], 403);
         }
         $messages = Message::where('conversation_id', $id)
             ->orderBy('created_at', 'asc')
             ->get()
-            ->map(function($msg) {
+            ->map(function ($msg) {
                 $time = '';
                 if ($msg->created_at) {
                     try {
                         $time = \Carbon\Carbon::parse($msg->created_at)
                             ->setTimezone('America/Costa_Rica')
                             ->format('h:i A');
-                    } catch (\Exception $e) {}
+                    } catch (\Exception $e) {
+                    }
                 }
                 return [
-                    '_id'             => (string)$msg->_id,
-                    'conversation_id' => (string)$msg->conversation_id,
-                    'sender_id'       => (string)$msg->sender_id,
-                    'message'         => $msg->message,
-                    'time'            => $time,
+                    '_id' => (string) $msg->_id,
+                    'conversation_id' => (string) $msg->conversation_id,
+                    'sender_id' => (string) $msg->sender_id,
+                    'message' => $msg->message,
+                    'time' => $time,
                 ];
             });
 
