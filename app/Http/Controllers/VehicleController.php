@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class VehicleController extends Controller
 {
+    // Obtiene una lista paginada de vehículos, aplicando filtros de búsqueda si existen
     public function index(Request $request)
     {
         $query = Vehicle::query();
@@ -45,12 +46,14 @@ class VehicleController extends Controller
         return response()->json($vehicles);
     }
 
+    // Muestra los detalles de un vehículo específico por su ID
     public function show($id)
     {
         $vehicle = Vehicle::with('user')->findOrFail($id);
         return response()->json($vehicle);
     }
 
+    // Crea un nuevo registro de vehículo
     public function createVehicle(Request $request) {
         $validator = Validator::make($request->all(), [
             'brand' => 'required|string',
@@ -61,6 +64,7 @@ class VehicleController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,webp',
             'user_id' => 'required'
         ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Error al crear el vehículo',
@@ -68,6 +72,7 @@ class VehicleController extends Controller
             ], 422);
         }
 
+        // Subida de imagen al almacenamiento público
         if($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('vehicles', 'public');
         } else {
@@ -90,6 +95,7 @@ class VehicleController extends Controller
         ], 201);
     }
 
+    // Modifica los datos de un vehículo existente
     public function editVehicle(Request $request, $id) {
         $validator = Validator::make($request->all(), [
             'brand' => 'string',
@@ -100,6 +106,7 @@ class VehicleController extends Controller
             'image' => 'image|mimes:jpeg,png,jpg,webp',
             'user_id' => 'string'
         ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Error al editar el vehículo',
@@ -110,30 +117,26 @@ class VehicleController extends Controller
         $vehicle = Vehicle::findOrFail($id);
 
         $vehicle->update($request->only([
-            'brand',
-            'model',
-            'year',
-            'price',
-            'status',
-            'image',
-            'user_id'
+            'brand', 'model', 'year', 'price', 'status', 'image', 'user_id'
         ]));
 
+        // Actualizar imagen si se envía una nueva
         if($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('vehicles', 'public');
-            $vehicle->update([
-                'image' => $imagePath
-            ]);
+            $vehicle->update(['image' => $imagePath]);
         }
+
         return response()->json([
             'message' => 'Vehículo editado exitosamente',
             'vehicle' => $vehicle
         ], 200);
     }
 
+    // Elimina el registro de un vehículo por su ID
     public function deleteVehicle(Request $request, $id) {
         $vehicle = Vehicle::findOrFail($id);
         $vehicle->delete();
+
         return response()->json([
             'message' => 'Vehículo eliminado exitosamente',
             'vehicle' => $vehicle
