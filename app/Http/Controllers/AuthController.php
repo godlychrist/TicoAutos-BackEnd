@@ -4,17 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // Usaremos DB directamente
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Routing\Controller as BaseController;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+/**
+ * AuthController - Gestión de autenticación (registro y login).
+ *
+ * Utiliza JWT (tymon/jwt-auth) para generar tokens de acceso.
+ * No extiende el Controller base de Laravel para evitar conflictos
+ * con los middlewares por defecto; extiende directamente BaseController.
+ */
 class AuthController extends BaseController
 {
+    /**
+     * Registrar un nuevo usuario.
+     *
+     * Valida username/password, hashea la contraseña con bcrypt
+     * y almacena el usuario en MongoDB.
+     */
     public function register(Request $request)
     {
-        // 1. Validamos los datos
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:255',
             'password' => 'required|string|min:6'
@@ -36,7 +48,6 @@ class AuthController extends BaseController
             ], 201);
 
         } catch (\Exception $e) {
-            // 3. Si algo sale mal con la conexión a Atlas, aquí lo veremos
             return response()->json([
                 'message' => 'Error de conexión con MongoDB Atlas',
                 'error' => $e->getMessage()
@@ -44,6 +55,13 @@ class AuthController extends BaseController
         }
     }
 
+    /**
+     * Iniciar sesión y obtener un token JWT.
+     *
+     * Busca al usuario por username, verifica la contraseña con Hash::check
+     * y genera un JWT válido para las peticiones autenticadas.
+     * Retorna el token + datos básicos del usuario (username, id).
+     */
     public function login(Request $request)
     {
         $credentials = $request->only('username', 'password');
@@ -51,7 +69,6 @@ class AuthController extends BaseController
         try {
             \Log::info('Intento de login para usuario: ' . $credentials['username']);
 
-            // 1. Buscamos al usuario
             $user = User::where('username', $credentials['username'])->first();
             if ($user) {
                 \Log::info('Usuario encontrado. Tipo de password: ' . gettype($user->password));
@@ -59,7 +76,6 @@ class AuthController extends BaseController
                 \Log::info('Usuario no encontrado.');
             }
 
-            // 2. Verificamos clave
             if (!$user || !Hash::check($credentials['password'], $user->password)) {
                 \Log::warning('Credenciales inválidas para: ' . $credentials['username']);
                 return response()->json(['error' => 'Credenciales inválidas'], 401);
@@ -67,7 +83,6 @@ class AuthController extends BaseController
 
             \Log::info('Clave verificada. Generando token...');
 
-            // 3. Generamos el token
             $token = JWTAuth::fromUser($user);
             \Log::info('Token generado con éxito');
 
@@ -89,3 +104,4 @@ class AuthController extends BaseController
     }
 
 }
+

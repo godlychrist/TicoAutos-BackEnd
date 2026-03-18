@@ -7,8 +7,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * VehicleController - CRUD completo de vehículos.
+ *
+ * Gestiona el listado paginado con filtros avanzados (marca, año, precio, estado),
+ * la creación con subida de imagen, edición parcial y eliminación.
+ * Las rutas de lectura (index, show) son públicas; las de escritura requieren JWT.
+ */
 class VehicleController extends Controller
 {
+    /**
+     * Listar vehículos con filtros opcionales y paginación.
+     *
+     * Soporta: brand (exacto), search (modelo parcial), year_min/year_max,
+     * status, y price_range (formato "min-max"). Paginado a 8 por página.
+     */
     public function index(Request $request)
     {
         $query = Vehicle::query();
@@ -45,12 +58,21 @@ class VehicleController extends Controller
         return response()->json($vehicles);
     }
 
+    /**
+     * Obtener un vehículo por ID, incluyendo datos del vendedor.
+     */
     public function show($id)
     {
         $vehicle = Vehicle::with('user')->findOrFail($id);
         return response()->json($vehicle);
     }
 
+    /**
+     * Crear un nuevo vehículo.
+     *
+     * Recibe los datos vía FormData (para soportar la subida de imagen).
+     * La imagen se almacena en storage/app/public/vehicles.
+     */
     public function createVehicle(Request $request) {
         $validator = Validator::make($request->all(), [
             'brand' => 'required|string',
@@ -90,6 +112,12 @@ class VehicleController extends Controller
         ], 201);
     }
 
+    /**
+     * Editar un vehículo existente.
+     *
+     * Acepta campos parciales (solo los enviados se actualizan).
+     * Si se envía una nueva imagen, reemplaza la anterior en storage.
+     */
     public function editVehicle(Request $request, $id) {
         $validator = Validator::make($request->all(), [
             'brand' => 'string',
@@ -131,6 +159,9 @@ class VehicleController extends Controller
         ], 200);
     }
 
+    /**
+     * Eliminar un vehículo por ID.
+     */
     public function deleteVehicle(Request $request, $id) {
         $vehicle = Vehicle::findOrFail($id);
         $vehicle->delete();
@@ -140,3 +171,4 @@ class VehicleController extends Controller
         ], 200);
     }
 }
+
