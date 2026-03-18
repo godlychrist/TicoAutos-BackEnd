@@ -8,43 +8,47 @@ use App\Http\Controllers\MessageController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes - TicoAutos
 |--------------------------------------------------------------------------
+|
+| Rutas organizadas en 3 grupos:
+| 1. Autenticación (públicas): registro y login
+| 2. Vehículos (lectura pública, escritura protegida)
+| 3. Mensajería (todas protegidas con JWT)
+|
 */
 
-// Devuelve el usuario autenticado actualmente
+// ── Usuario autenticado ──
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// ------------------------------------------------------------------------
-// Rutas Públicas
-// ------------------------------------------------------------------------
-
-// Autenticación de usuarios
+// ── Autenticación (públicas) ──
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Consulta de vehículos (Público)
-Route::get('/vehicles', [VehicleController::class, 'index']);      // Listar todos
-Route::get('/vehicles/{id}', [VehicleController::class, 'show']);  // Detalle de vehículo
+// ── Vehículos: lectura pública (catálogo y detalle) ──
+Route::get('/vehicles', [VehicleController::class, 'index']);
+Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
 
-
-// ------------------------------------------------------------------------
-// Rutas Protegidas (Requieren Token JWT/Sanctum)
-// ------------------------------------------------------------------------
+// ── Rutas protegidas (requieren token JWT válido) ──
 Route::middleware('auth:api')->group(function () {
+
+    // Vehículos: escritura (crear, editar, eliminar)
+    Route::post('/vehicles', [VehicleController::class, 'createVehicle']);
+    Route::put('/vehicles/{id}', [VehicleController::class, 'editVehicle']);
+    Route::delete('/vehicles/{id}', [VehicleController::class, 'deleteVehicle']);
     
-    // Gestión de Vehículos
-    Route::post('/vehicles', [VehicleController::class, 'createVehicle']);       // Crear
-    Route::put('/vehicles/{id}', [VehicleController::class, 'editVehicle']);     // Actualizar
-    Route::delete('/vehicles/{id}', [VehicleController::class, 'deleteVehicle']); // Eliminar
-    
-    // Gestión de Conversaciones
-    Route::post('/conversations', [MessageController::class, 'createConversation']); // Iniciar chat
-    Route::get('/conversations', [MessageController::class, 'getConversations']);    // Listar chats
-    Route::get('/conversations/{id}', [MessageController::class, 'getConversation']); // Ver chat
+    // Conversaciones: crear, listar, ver detalle
+    Route::post('/conversations', [MessageController::class, 'createConversation']);
+    Route::get('/conversations', [MessageController::class, 'getConversations']);
+    Route::get('/conversations/{id}', [MessageController::class, 'getConversation']);
+
+    // Mensajes: enviar mensaje
+    Route::post('/messages', [MessageController::class, 'store']);
 
     // Envío de Mensajes
     Route::post('/messages', [MessageController::class, 'store']); // Enviar mensaje
 });
+
+
