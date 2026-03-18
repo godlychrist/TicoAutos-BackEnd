@@ -1,66 +1,204 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏎️ TicoAutos — Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST para el marketplace de vehículos **TicoAutos**, construida con **Laravel 9** y **MongoDB Atlas**. Provee autenticación JWT, CRUD de vehículos con subida de imágenes, y un sistema de mensajería entre compradores y vendedores.
 
-## About Laravel
+> 🖥️ **Frontend:** Este backend se conecta con el cliente Vue.js disponible en el repositorio [ticoautos-frontend](https://github.com/tu-usuario/ticoautos-frontend).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠 Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Tecnología | Versión | Uso |
+|---|---|---|
+| **PHP** | ^8.0.2 | Lenguaje del servidor |
+| **Laravel** | ^9.19 | Framework backend |
+| **MongoDB Atlas** | Cloud | Base de datos NoSQL |
+| **jenssegers/mongodb** | ^3.9 | Driver Eloquent para MongoDB |
+| **tymon/jwt-auth** | 2.1 | Autenticación con JSON Web Tokens |
+| **Laravel Sanctum** | ^3.0 | Tokens API |
+| **Composer** | Latest | Gestor de dependencias PHP |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## ✅ Requisitos Previos
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **PHP** >= 8.0.2 → [Descargar](https://www.php.net/downloads)
+- **Composer** → [Descargar](https://getcomposer.org/download/)
+- **Extensión PHP MongoDB** (`php_mongodb.dll`) habilitada en tu `php.ini`
+- **Cuenta de MongoDB Atlas** con un cluster activo → [MongoDB Atlas](https://www.mongodb.com/atlas)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+# Verificar instalaciones
+php -v          # PHP 8.x
+composer -V     # Composer 2.x
+```
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## 🚀 Instalación
 
-### Premium Partners
+```bash
+# 1. Clonar el repositorio
+git clone <url-del-repositorio>
+cd ticoautos-backend
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+# 2. Instalar dependencias con Composer
+composer install
 
-## Contributing
+# 3. Copiar el archivo de entorno
+copy .env.example .env
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 4. Generar la clave de la aplicación
+php artisan key:generate
 
-## Code of Conduct
+# 5. Generar el secreto JWT
+php artisan jwt:secret
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 6. Crear enlace simbólico para servir imágenes desde storage
+php artisan storage:link
+```
 
-## Security Vulnerabilities
+### Configurar `.env`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Editá el archivo `.env` con tus credenciales de MongoDB Atlas:
 
-## License
+```env
+DB_CONNECTION=mongodb
+DB_URI=mongodb+srv://<usuario>:<contraseña>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority
+DB_DATABASE=TicoCars
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+> ⚠️ Asegurate de agregar tu IP a la **whitelist** de MongoDB Atlas (Network Access).
+
+---
+
+## ▶️ Ejecución
+
+```bash
+php artisan serve
+```
+
+> El servidor se inicia en `http://127.0.0.1:8000`
+
+---
+
+## 📡 Endpoints de la API
+
+Base URL: `http://127.0.0.1:8000/api`
+
+### Autenticación (públicas)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/register` | Registrar nuevo usuario |
+| `POST` | `/login` | Iniciar sesión → retorna JWT |
+
+### Vehículos — Lectura (públicas)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/vehicles` | Listar vehículos (paginado + filtros) |
+| `GET` | `/vehicles/{id}` | Detalle de un vehículo con datos del vendedor |
+
+**Query params disponibles:** `search`, `brand`, `year_min`, `year_max`, `status`, `price_range`, `page`
+
+### Vehículos — Escritura (🔒 requieren JWT)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/vehicles` | Crear vehículo (FormData con imagen) |
+| `PUT` | `/vehicles/{id}` | Editar vehículo |
+| `DELETE` | `/vehicles/{id}` | Eliminar vehículo |
+
+### Conversaciones y Mensajes (🔒 requieren JWT)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/conversations` | Crear o reutilizar conversación |
+| `GET` | `/conversations` | Listar conversaciones del usuario |
+| `GET` | `/conversations/{id}` | Obtener mensajes de una conversación |
+| `POST` | `/messages` | Enviar un mensaje |
+
+> 🔑 Header requerido en rutas protegidas: `Authorization: Bearer <token>`
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+ticoautos-backend/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.php        # Registro y login con JWT
+│   │   │   ├── VehicleController.php     # CRUD de vehículos + filtros
+│   │   │   └── MessageController.php     # Mensajería y conversaciones
+│   │   └── Middleware/                   # CORS, autenticación, etc.
+│   ├── Models/
+│   │   ├── User.php                      # Usuario (JWT + MongoDB)
+│   │   ├── Vehicle.php                   # Vehículo publicado
+│   │   ├── Conversation.php              # Hilo de chat buyer ↔ seller
+│   │   └── Message.php                   # Mensaje individual
+│   └── Providers/                        # Service providers
+├── config/
+│   └── database.php                      # Configuración MongoDB Atlas
+├── routes/
+│   └── api.php                           # Definición de rutas API
+├── storage/app/public/vehicles/          # Imágenes subidas
+├── .env.example                          # Plantilla de variables de entorno
+└── composer.json                         # Dependencias PHP
+```
+
+---
+
+## 🔐 Variables de Entorno
+
+| Variable | Descripción |
+|---|---|
+| `DB_CONNECTION` | `mongodb` |
+| `DB_URI` | Connection string de MongoDB Atlas |
+| `DB_DATABASE` | Nombre de la base de datos (`TicoCars`) |
+| `JWT_SECRET` | Clave para firmar tokens (auto-generada) |
+| `APP_KEY` | Clave de encriptación Laravel (auto-generada) |
+
+---
+
+## 📝 Modelos de Datos
+
+### User
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `_id` | ObjectId | ID generado por MongoDB |
+| `username` | string | Nombre de usuario |
+| `password` | string | Contraseña hasheada (bcrypt) |
+
+### Vehicle
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `_id` | ObjectId | ID del vehículo |
+| `brand` | string | Marca (ej: Toyota, Ferrari) |
+| `model` | string | Modelo (ej: Corolla, F8 Tributo) |
+| `year` | integer | Año del vehículo |
+| `price` | float | Precio en USD |
+| `status` | string | `available` o `sold` |
+| `image` | string | Ruta de la imagen en storage |
+| `user_id` | string | ID del vendedor (relación con User) |
+
+### Conversation
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `_id` | ObjectId | ID de la conversación |
+| `buyer_id` | string | ID del comprador |
+| `seller_id` | string | ID del vendedor |
+| `vehicle_id` | string | ID del vehículo relacionado |
+| `last_message` | string | Último mensaje enviado |
+| `last_message_at` | datetime | Timestamp del último mensaje |
+
+### Message
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `_id` | ObjectId | ID del mensaje |
+| `conversation_id` | string | Conversación a la que pertenece |
+| `sender_id` | string | ID del remitente |
+| `message` | string | Contenido del mensaje |
+| `created_at` | string | Timestamp de creación |
