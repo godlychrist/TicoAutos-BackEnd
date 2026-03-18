@@ -22,11 +22,11 @@ class VehicleController extends Controller
         }
 
         if ($request->filled('year_min')) {
-            $query->where('year', '>=', $request->year_min);
+            $query->where('year', '>=', (int) $request->year_min);
         }
 
         if ($request->filled('year_max')) {
-            $query->where('year', '<=', $request->year_max);
+            $query->where('year', '<=', (int) $request->year_max);
         }
 
         if ($request->filled('status')) {
@@ -43,6 +43,12 @@ class VehicleController extends Controller
         $vehicles = $query->paginate(8);
 
         return response()->json($vehicles);
+    }
+
+    public function show($id)
+    {
+        $vehicle = Vehicle::with('user')->findOrFail($id);
+        return response()->json($vehicle);
     }
 
     public function createVehicle(Request $request) {
